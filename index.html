@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102b45">
+  <title>متابعة فرص المبيعات</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">مِحور لابز · نموذج محلي</p>
+        <h1>متابعة فرص المبيعات</h1>
+        <p class="hero-copy">سجّلي الجهات التي تراجعينها يدوياً، وتابعي الخطوة التالية في مكان واحد</p>
+      </div>
+      <button id="add-prospect" class="button button-primary" type="button">إضافة جهة</button>
+    </header>
+
+    <section class="privacy-note" aria-label="حدود النموذج">
+      <span class="privacy-mark" aria-hidden="true">●</span>
+      <div>
+        <strong>بيانات محلية فقط</strong>
+        <p>يحفظ هذا النموذج السجلات والقوالب في تخزين المتصفح على هذا الجهاز. لا يوجد بحث مباشر أو اتصال بخدمات خارجية أو إرسال رسائل. تجنّبي إدخال بيانات سرية أو حساسة.</p>
+      </div>
+    </section>
+
+    <p id="notice" class="notice" role="status" aria-live="polite"></p>
+
+    <section class="panel" aria-labelledby="records-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">سجل المتابعة</p>
+          <h2 id="records-title">الجهات</h2>
+        </div>
+        <p class="count-line"><span id="visible-count">0</span> ظاهرة من <span id="record-count">0</span></p>
+      </div>
+
+      <div class="filters">
+        <label class="search-field">
+          <span>بحث داخل السجلات</span>
+          <input id="search" type="search" placeholder="اسم أو مصدر أو ملاحظة" autocomplete="off">
+        </label>
+        <label>
+          <span>الحالة</span>
+          <select id="status-filter">
+            <option value="all">كل الحالات</option>
+            <option>جديد</option>
+            <option>تمت المراجعة</option>
+            <option>قيد المتابعة</option>
+            <option>تم التواصل</option>
+            <option>مؤهل</option>
+            <option>مؤجل</option>
+            <option>مغلق</option>
+          </select>
+        </label>
+        <label class="check-field">
+          <input id="due-filter" type="checkbox">
+          <span>متابعة مستحقة اليوم أو قبل اليوم</span>
+        </label>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">الشركة / جهة الاتصال</th>
+              <th scope="col">الموقع أو مرجع الاتصال</th>
+              <th scope="col">المصدر</th>
+              <th scope="col">الحالة</th>
+              <th scope="col">تاريخ المراجعة</th>
+              <th scope="col">موعد المتابعة</th>
+              <th scope="col">ملاحظات</th>
+              <th scope="col">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="prospect-rows"></tbody>
+        </table>
+      </div>
+      <p id="storage-state" class="storage-state">لا تُرسل السجلات إلى أي جهة من داخل النموذج</p>
+    </section>
+
+    <section class="workbench" aria-label="القوالب والمسودات">
+      <section class="panel editor-panel" aria-labelledby="templates-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">قابلة للتعديل</p>
+            <h2 id="templates-title">قوالب عربية</h2>
+          </div>
+        </div>
+        <label>
+          <span>القالب</span>
+          <select id="template-select"></select>
+        </label>
+        <label>
+          <span>اسم القالب</span>
+          <input id="template-name" type="text" maxlength="80" autocomplete="off">
+        </label>
+        <label>
+          <span>نص القالب</span>
+          <textarea id="template-body" rows="8" maxlength="4000"></textarea>
+        </label>
+        <p class="field-hint">يمكن استخدام {{company}} لاسم الجهة و{{name}} لاسم جهة الاتصال. النص يبقى في هذا المتصفح.</p>
+        <button id="save-template" class="button button-secondary" type="button">حفظ القالب</button>
+      </section>
+
+      <section class="panel draft-panel" aria-labelledby="draft-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">مراجعة يدوية</p>
+            <h2 id="draft-title">مسودة رسالة</h2>
+          </div>
+        </div>
+        <label>
+          <span>الجهة</span>
+          <select id="draft-prospect"></select>
+        </label>
+        <button id="make-draft" class="button button-primary" type="button">إنشاء مسودة للمراجعة</button>
+        <label class="draft-label">
+          <span>راجعي النص وعدّليه قبل نسخه</span>
+          <textarea id="draft-output" rows="11" maxlength="6000" placeholder="ستظهر المسودة هنا، ويمكنك تعديلها قبل نسخها"></textarea>
+        </label>
+        <button id="copy-draft" class="button button-secondary" type="button">نسخ المسودة</button>
+        <p class="field-hint">النسخ هو الإجراء الوحيد المتاح للمسودة، لا يوجد زر إرسال ولا ربط بالبريد أو واتساب أو الشبكات الاجتماعية</p>
+      </section>
+    </section>
+
+    <footer class="footer-note">
+      <span>نسخة تجريبية محلية</span>
+      <span>لا نشر عام · لا بحث مباشر · لا إرسال تلقائي</span>
+    </footer>
+  </main>
+
+  <dialog id="prospect-dialog" aria-labelledby="dialog-title">
+    <form id="prospect-form" class="dialog-form">
+      <div class="section-heading dialog-heading">
+        <h2 id="dialog-title">إضافة سجل</h2>
+        <button id="cancel-dialog" class="icon-button" type="button" aria-label="إغلاق">×</button>
+      </div>
+      <label>
+        <span>اسم الشركة أو الجهة <b aria-hidden="true">*</b></span>
+        <input id="field-company" name="company" type="text" maxlength="160" required autocomplete="organization">
+      </label>
+      <label>
+        <span>اسم جهة الاتصال، إن توفر</span>
+        <input id="field-contact" name="contactName" type="text" maxlength="160" autocomplete="name">
+      </label>
+      <label>
+        <span>الموقع أو مرجع الاتصال</span>
+        <input id="field-reference" name="reference" type="text" maxlength="300" placeholder="أدخليه يدوياً، لن يُفتح أو يُفحص تلقائياً" autocomplete="url">
+      </label>
+      <label>
+        <span>مصدر المعلومة</span>
+        <input id="field-source" name="source" type="text" maxlength="160" placeholder="مثال: إحالة أو بحث يدوي">
+      </label>
+      <div class="field-grid">
+        <label>
+          <span>تاريخ المراجعة</span>
+          <input id="field-checked" name="dateChecked" type="date">
+        </label>
+        <label>
+          <span>الحالة</span>
+          <select id="field-status" name="status">
+            <option>جديد</option>
+            <option>تمت المراجعة</option>
+            <option>قيد المتابعة</option>
+            <option>تم التواصل</option>
+            <option>مؤهل</option>
+            <option>مؤجل</option>
+            <option>مغلق</option>
+          </select>
+        </label>
+      </div>
+      <label>
+        <span>موعد المتابعة</span>
+        <input id="field-follow-up" name="followUp" type="date">
+      </label>
+      <label>
+        <span>ملاحظات</span>
+        <textarea id="field-notes" name="notes" rows="4" maxlength="2000"></textarea>
+      </label>
+      <div class="dialog-actions">
+        <button class="button button-primary" type="submit">حفظ السجل</button>
+        <button class="button button-quiet" type="button" id="cancel-dialog-secondary" onclick="document.getElementById('cancel-dialog').click()">إلغاء</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
